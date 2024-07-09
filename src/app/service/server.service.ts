@@ -49,7 +49,7 @@ export class ServerService {
   filter$ = (status: Status, response: CustomResponse) => <Observable<CustomResponse>>
     new Observable<CustomResponse>(
       subscriber => {
-        console.log(response);
+        console.log(response); // list server được truyền vào để lọc
 
         // let updatedResponse;
         // // nếu chọn Server status ALL trả về tất cả Server
@@ -72,9 +72,7 @@ export class ServerService {
         const filteredServers = response.data.servers?.filter(server => server.status === status);
         let updatedResponse =
           status === Status.ALL ?
-            {
-              ...response,
-              message: `Servers filtered by ${status} status`} :
+            {...response, message: `Servers filtered by ${status} status`} :
             {
               ...response,
               message: (filteredServers && filteredServers.length > 0) ?
@@ -84,7 +82,7 @@ export class ServerService {
                 servers: response.data.servers?.filter(server => server.status === status)
               }
             }
-        subscriber.next(updatedResponse)
+        subscriber.next(updatedResponse);
         subscriber.complete();
       }
     ).pipe(

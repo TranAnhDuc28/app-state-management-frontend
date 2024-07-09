@@ -17,7 +17,12 @@
           <div class="col-sm-6 d-flex justify-content-end">
 
             <span>
-              <select name="status" class="btn btn-info form" style="height: 33px;">
+              <!--
+               - Đặt dữ liệu được chọn mặc định ngModel="ALL"
+               - (ngModelChange) chỉ hoạt động khi bạn sử dụng ngModel. Nó được kích hoạt mỗi khi giá trị của ngModel
+               thay đổi, bất kể người dùng có rời khỏi phần tử input hay không.
+              -->
+              <select ngModel="ALL" (ngModelChange)="filterServers($event)" name="status" class="btn btn-info form" style="height: 33px;">
                 <option value="ALL">ALL</option>
                 <option value="SERVER_UP">SERVER UP</option>
                 <option value="SERVER_DOWN">SERVER DOWN</option>
@@ -29,7 +34,7 @@
               <span>New Server</span>
             </a>
 
-            <button type="button" class="btn btn-primary">Print Report</button>
+            <button (click)="printReport()" type="button" class="btn btn-primary">Print Report</button>
           </div>
         </div>
       </div>
@@ -72,16 +77,16 @@
               <td>
                 <a (click)="pingServer(server.ipAddress)" style="cursor: pointer;">
                   <!-- Kiểm tra giá trị của filterStatus$ nếu là ''
-                       hoặc ipAddress(filterStatus$) truyền vào khác ipAddress được ping thì hiển thị material-icons-->
+                       hoặc ipAddress (filterStatus$) truyền vào khác ipAddress được ping thì hiển thị material-icons-->
                   <i *ngIf="(filterStatus$ | async) === '' || (filterStatus$ | async) !== server.ipAddress"
                     class="material-icons" title="Ping server">&#xe328;</i>
-                  <!-- Nếu ipAddress(filterStatus$) truyền vào giống ipAddress được ping thì hiển thị fa-spinner-->
+                  <!-- Nếu ipAddress (filterStatus$) truyền vào giống ipAddress được ping thì hiển thị fa-spinner-->
                   <i *ngIf="(filterStatus$ | async) === server.ipAddress"
                     class="fa fa-spinner fa-spin" style="font-size:24px"></i>
                 </a>
               </td>
               <td>
-                <a class="delete" data-bs-toggle="modal" style="cursor: pointer;">
+                <a (click)="deleteServer(server)" class="delete text-center" data-bs-toggle="modal" style="cursor: pointer;">
                   <i class="material-icons" data-bs-toggle="tooltip" title="Delete">&#xE872;</i>
                 </a>
               </td>
@@ -103,7 +108,7 @@
 <div id="addEmployeeModal" class="modal fade">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form>
+      <form #serverForm="ngForm" (ngSubmit)="saveServer(serverForm)">
         <div class="modal-header">
           <h4 class="modal-title">Add Server</h4>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
@@ -111,29 +116,29 @@
         <div class="modal-body">
           <div class="form-group">
             <label>IP</label>
-            <input type="text" name="ipAddress" class="form-control" required>
+            <input type="text" ngModel name="ipAddress" class="form-control" required>
           </div>
           <div class="form-group mt-3">
             <label>Name</label>
-            <input type="text" name="name" class="form-control" required>
+            <input type="text" ngModel name="name" class="form-control" required>
           </div>
           <div class="row mt-3">
             <div class="col-md-6">
               <div class="form-group">
                 <label>Memory</label>
-                <input type="text" name="memory" class="form-control" required>
+                <input type="text" ngModel name="memory" class="form-control" required>
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-group">
                 <label>Type</label>
-                <input type="text" name="type" class="form-control" required>
+                <input type="text" ngModel name="type" class="form-control" required>
               </div>
             </div>
           </div>
           <div class="form-group mt-3">
             <label>Status</label>
-            <select name="status" class="form-select" required>
+            <select name="status" ngModel="SERVER_DOWN" class="form-select" required>
               <option value="SERVER_UP">SERVER UP</option>
               <option value="SERVER_DOWN">SERVER DOWN</option>
             </select>
@@ -143,10 +148,19 @@
           <button type="button" class="btn btn-warning" id="closeModal" data-bs-dismiss="modal">
             Cancel
           </button>
-          <button type="submit" class="btn btn-success">Submit</button>
+          <button type="submit" [disabled]="serverForm.invalid || (isLoading$ | async)"
+                  class="btn btn-success">
+            <!-- Nếu nhấn Add và đang load thì hiển thị spinner và text="Saving..." -->
+            <i *ngIf="(isLoading$ | async)" class="fas fa-spinner fa-spin"></i>
+            <span *ngIf="(isLoading$ | async)">Saving...</span>
+
+            <!-- Nếu chưa nhấn Add và không đang load thì hiển thị text="Add" -->
+            <span *ngIf="!(isLoading$ | async)">Add</span>
+          </button>
         </div>
       </form>
     </div>
   </div>
 </div>
+<notifier-container></notifier-container>
 
